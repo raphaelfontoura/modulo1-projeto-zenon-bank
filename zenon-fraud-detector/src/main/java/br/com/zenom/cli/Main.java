@@ -3,11 +3,31 @@ package br.com.zenom.cli;
 import br.com.zenom.fraud.Customer;
 import br.com.zenom.fraud.Transaction;
 import br.com.zenom.fraud.TransactionType;
+import br.com.zenom.ingestor.TransactionIngestor;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main {
+
+    private static final Logger log = Logger.getLogger(Main.class.getName());
+
     static void main() {
+//        testTransactionsRecords();
+
+        TransactionIngestor ingestor = new TransactionIngestor();
+        try {
+            List<Transaction> transactions = ingestor.ingestorFileTransactions("data/PS_20174392719_1491204439457_log.csv");
+            System.out.println(transactions);
+        } catch (IOException ex) {
+            log.log(Level.SEVERE, "Falha ao ler arquivo", ex);
+        }
+    }
+
+    private static void testTransactionsRecords() {
         Transaction transacao1 = new Transaction(
                 1,
                 TransactionType.PAYMENT,
@@ -34,7 +54,7 @@ public class Main {
                 true,
                 false
         );
-        System.out.println(transacao1);
-        System.out.println(transacao2);
+        log.info(transacao1.toString());
+        log.info(transacao2.toString());
     }
 }
