@@ -9,17 +9,27 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TransactionIngestor {
 
-    public List<Transaction> ingestorFileTransactions(String fileName) throws IOException {
+    private static final Logger log = Logger.getLogger(TransactionIngestor.class.getName());
+
+    public List<Transaction> ingestorFileTransactions(String fileName) {
         Path path = Path.of(fileName);
+        try {
         List<String> transactionLines = Files.readAllLines(path);
         return transactionLines.stream()
                 .skip(1)
                 .limit(1000)
                 .map(TransactionIngestor::getTransaction)
                 .toList();
+        } catch (IOException ex) {
+            log.log(Level.SEVERE, "Erro no ingestor.", ex);
+            throw new RuntimeException("Falha ao ler arquivo", ex);
+        }
+
     }
 
     private static Transaction getTransaction(String line) {

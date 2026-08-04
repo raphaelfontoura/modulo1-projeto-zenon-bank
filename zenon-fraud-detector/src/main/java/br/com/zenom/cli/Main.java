@@ -5,10 +5,8 @@ import br.com.zenom.fraud.Transaction;
 import br.com.zenom.fraud.TransactionType;
 import br.com.zenom.ingestor.TransactionIngestor;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Main {
@@ -19,12 +17,9 @@ public class Main {
 //        testTransactionsRecords();
 
         TransactionIngestor ingestor = new TransactionIngestor();
-        try {
-            List<Transaction> transactions = ingestor.ingestorFileTransactions("data/PS_20174392719_1491204439457_log.csv");
-            transactions.stream().limit(10).forEach(IO::println);
-        } catch (IOException ex) {
-            log.log(Level.SEVERE, "Falha ao ler arquivo", ex);
-        }
+        List<Transaction> transactions = ingestor.ingestorFileTransactions("data/PS_20174392719_1491204439457_log.csv");
+        transactions.stream().limit(10).forEach(IO::println);
+
     }
 
     private static void testTransactionsRecords() {
