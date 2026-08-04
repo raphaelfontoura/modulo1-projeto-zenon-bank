@@ -19,7 +19,7 @@ public class Main {
         TransactionIngestor ingestor = new TransactionIngestor();
 //        List<Transaction> transactions = ingestor.ingestorFileTransactions("data/PS_20174392719_1491204439457_log.csv");
         List<Transaction> transactions = ingestor.ingestorFileTransactions("data/paysim_with_bad_data.csv");
-        System.out.println(transactions.size());
+        IO.println(transactions.size());
         transactions.stream().limit(10).forEach(IO::println);
 
     }
