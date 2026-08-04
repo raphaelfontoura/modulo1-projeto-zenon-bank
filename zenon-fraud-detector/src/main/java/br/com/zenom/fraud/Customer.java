@@ -1,10 +1,11 @@
 package br.com.zenom.fraud;
 
-import java.math.BigDecimal;
-
 public record Customer(
         String name,
-        BigDecimal oldBalance,
-        BigDecimal newBalance
+        Currency oldBalance,
+        Currency newBalance
 ) {
+    public Customer {
+        if (name.isBlank()) throw new IllegalArgumentException("name should not be empty");
+    }
 }
