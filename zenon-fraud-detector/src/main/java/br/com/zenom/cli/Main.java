@@ -21,7 +21,7 @@ public class Main {
         TransactionIngestor ingestor = new TransactionIngestor();
         try {
             List<Transaction> transactions = ingestor.ingestorFileTransactions("data/PS_20174392719_1491204439457_log.csv");
-            transactions.stream().limit(10).forEach(System.out::println);
+            transactions.stream().limit(10).forEach(IO::println);
         } catch (IOException ex) {
             log.log(Level.SEVERE, "Falha ao ler arquivo", ex);
         }
