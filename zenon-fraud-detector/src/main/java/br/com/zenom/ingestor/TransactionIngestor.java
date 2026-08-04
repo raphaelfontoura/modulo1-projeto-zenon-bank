@@ -18,11 +18,12 @@ public class TransactionIngestor {
         return transactionLines.stream()
                 .skip(1)
                 .limit(1000)
-                .map(line -> getTransaction(line.split(",")))
+                .map(TransactionIngestor::getTransaction)
                 .toList();
     }
 
-    private static Transaction getTransaction(String[] values) {
+    private static Transaction getTransaction(String line) {
+        String[] values = line.split(",");
         int step = Integer.parseInt(values[0]);
         TransactionType type = TransactionType.valueOf(values[1]);
         BigDecimal amount = new BigDecimal(values[2]);
