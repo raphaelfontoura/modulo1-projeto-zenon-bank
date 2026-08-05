@@ -1,11 +1,18 @@
 package br.com.zenom.fraud;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
-public record Currency(BigDecimal amount) {
+public record Currency(BigDecimal value) {
+    public Currency {
+        if (Objects.isNull(value)) throw new IllegalArgumentException("value cannot be null");
+        if (value.signum() < 0)
+            throw new IllegalArgumentException("amount should be positive: " + value);
+    }
     public Currency(String amount) {
         this(new BigDecimal(amount));
-        if (this.amount.signum() < 0)
-            throw new IllegalArgumentException("amount should be positive: " + amount);
+    }
+    public BigDecimal toBigDecimal() {
+        return value;
     }
 }

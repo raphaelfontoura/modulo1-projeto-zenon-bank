@@ -23,7 +23,7 @@ public class TransactionIngestor {
         List<String> transactionLines = Files.readAllLines(path);
         return transactionLines.stream()
                 .skip(1)
-                .limit(1000)
+                .limit(50000)
                 .map(TransactionIngestor::getTransaction)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
