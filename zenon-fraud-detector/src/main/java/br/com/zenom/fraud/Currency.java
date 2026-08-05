@@ -3,7 +3,7 @@ package br.com.zenom.fraud;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public record Currency(BigDecimal value) {
+public record Currency(BigDecimal value) implements Comparable<Currency>  {
     public Currency {
         if (Objects.isNull(value)) throw new IllegalArgumentException("value cannot be null");
         if (value.signum() < 0)
@@ -14,5 +14,10 @@ public record Currency(BigDecimal value) {
     }
     public BigDecimal toBigDecimal() {
         return value;
+    }
+
+    @Override
+    public int compareTo(Currency o) {
+        return this.value.compareTo(o.value);
     }
 }

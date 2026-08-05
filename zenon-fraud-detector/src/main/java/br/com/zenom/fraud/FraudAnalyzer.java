@@ -24,16 +24,16 @@ public class FraudAnalyzer {
     }
 
     public List<Transaction> findHighestValueFrauds(int limit) {
-        Comparator<Transaction> comparatorAmount = Comparator.comparing(transaction -> transaction.amount().value());
-
         return getFrauds()
-                .sorted(comparatorAmount.reversed())
+                .sorted(Comparator.comparing(Transaction::amount).reversed())
                 .limit(limit)
                 .toList();
     }
 
     public List<String> findTopSuspiciousClients(int limit) {
-        return getFrauds().map(t -> t.origin().name()).distinct().limit(limit).toList();
+        return getFrauds()
+                .sorted(Comparator.comparing(Transaction::amount).reversed())
+                .map(t -> t.origin().name()).distinct().limit(limit).toList();
     }
 
     public BigDecimal totalAmountFrauds() {
