@@ -6,11 +6,11 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class TransactionListRepositoryOptimizedImpl implements TransactionListRepository {
+public class TransactionMapRepositoryImpl implements TransactionRepository {
 
     private final Map<String, Transaction> dbTransactions;
 
-    public TransactionListRepositoryOptimizedImpl(List<Transaction> transactions) {
+    public TransactionMapRepositoryImpl(List<Transaction> transactions) {
         Objects.requireNonNull(transactions);
 
 //        dbTransactions = new TreeMap<>();

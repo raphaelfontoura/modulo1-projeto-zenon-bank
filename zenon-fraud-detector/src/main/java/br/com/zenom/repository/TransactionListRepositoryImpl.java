@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class TransactionListRepositoryImpl implements TransactionListRepository{
+public class TransactionListRepositoryImpl implements TransactionRepository {
 
     private final List<Transaction> transactions;
 

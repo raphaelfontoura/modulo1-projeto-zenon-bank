@@ -4,7 +4,7 @@ import br.com.zenom.fraud.Transaction;
 
 import java.util.Optional;
 
-public interface TransactionListRepository {
+public interface TransactionRepository {
 
     Optional<Transaction> findByOriginCustomerName(String name);
 }

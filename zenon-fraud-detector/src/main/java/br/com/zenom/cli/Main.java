@@ -2,9 +2,9 @@ package br.com.zenom.cli;
 
 import br.com.zenom.fraud.*;
 import br.com.zenom.ingestor.TransactionIngestor;
-import br.com.zenom.repository.TransactionListRepository;
 import br.com.zenom.repository.TransactionListRepositoryImpl;
-import br.com.zenom.repository.TransactionListRepositoryOptimizedImpl;
+import br.com.zenom.repository.TransactionRepository;
+import br.com.zenom.repository.TransactionMapRepositoryImpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +43,7 @@ public class Main {
 
         IO.println();
         IO.println("====== Transactions memory list database =======");
-        TransactionListRepository repository = new TransactionListRepositoryOptimizedImpl(transactions);
+        TransactionRepository repository = new TransactionListRepositoryImpl(transactions);
         var client1 = "C12345";
         var client2 = "C1231006815";
 
@@ -54,10 +54,16 @@ public class Main {
                 .ifPresentOrElse(IO::println, () -> IO.println("Transação não encontrada para o cliente " + client2));
 
         long init = System.nanoTime();
-        Optional<Transaction> lastClient = repository.findByOriginCustomerName("C1868032458");
-        if (lastClient.isPresent()) IO.println(lastClient);
+        repository.findByOriginCustomerName("C1868032458").ifPresent(IO::println);
         long last = System.nanoTime();
-        IO.println("A pesquisa levou %d nano segundos".formatted((last - init)));
+        IO.println("A pesquisa com list levou %d nano segundos".formatted((last - init)));
+
+        repository = new TransactionMapRepositoryImpl(transactions);
+
+        init = System.nanoTime();
+        repository.findByOriginCustomerName("C1868032458").ifPresent(IO::println);
+        last = System.nanoTime();
+        IO.println("A pesquisa com map levou %d nano segundos".formatted((last - init)));
         // A pesquisa levou 20167229 nano segundos (ArrayList)
         // A pesquisa levou 835022 nano segundos (HashMap)
         // A pesquisa levou 391020 nano segundos (TreeMap)
