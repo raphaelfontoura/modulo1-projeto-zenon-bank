@@ -2,8 +2,12 @@ package br.com.zenom.cli;
 
 import br.com.zenom.fraud.*;
 import br.com.zenom.ingestor.TransactionIngestor;
+import br.com.zenom.repository.TransactionListRepository;
+import br.com.zenom.repository.TransactionListRepositoryImpl;
+import br.com.zenom.repository.TransactionListRepositoryOptimizedImpl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 public class Main {
@@ -20,8 +24,9 @@ public class Main {
         transactionsError.stream().limit(10).forEach(IO::println);
         IO.println();
 
-        IO.println("====== Fraud Analyzer =======");
         List<Transaction> transactions = ingestor.ingestorFileTransactions("data/PS_20174392719_1491204439457_log.csv");
+
+        IO.println("====== Fraud Analyzer =======");
         FraudAnalyzer fraudAnalyzer = new FraudAnalyzer(transactions);
         IO.println("1. total de fraudes: " + fraudAnalyzer.countFrauds());
 
@@ -35,6 +40,36 @@ public class Main {
 
         IO.println("5. Fraudes por Tipo:");
         fraudAnalyzer.countFraudsByType().forEach((k, v) -> IO.println("- " + k.name() + ": " + v));
+
+        IO.println();
+        IO.println("====== Transactions memory list database =======");
+        TransactionListRepository repository = new TransactionListRepositoryOptimizedImpl(transactions);
+        var client1 = "C12345";
+        var client2 = "C1231006815";
+
+        var transaction = repository.findByOriginCustomerName(client1);
+        if (transaction.isEmpty()) {
+            IO.println("Transação não encontrada para o cliente " + client1);
+        } else {
+            IO.println(transaction);
+        }
+
+        var transaction2 = repository.findByOriginCustomerName(client2);
+        if (transaction2.isEmpty()) {
+            IO.println("Transação não encontrada para o cliente " + client2);
+        } else {
+            IO.println(transaction2);
+        }
+
+        long init = System.nanoTime();
+        Optional<Transaction> lastClient = repository.findByOriginCustomerName("C1868032458");
+        if (lastClient.isPresent()) IO.println(lastClient);
+        long last = System.nanoTime();
+        IO.println("A pesquisa levou %d nano segundos".formatted((last - init)));
+        // A pesquisa levou 20167229 nano segundos (ArrayList)
+        // A pesquisa levou 835022 nano segundos (HashMap)
+        // A pesquisa levou 391020 nano segundos (TreeMap)
+
     }
 
     private static void testTransactionsRecords() {

@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 public class TransactionIngestor {
 
     private static final Logger log = Logger.getLogger(TransactionIngestor.class.getName());
-    private static final long LIMIT = 50_000;
+    private static final long LIMIT = 100_000;
 
     public List<Transaction> ingestorFileTransactions(String fileName) {
         Path path = Path.of(fileName);
