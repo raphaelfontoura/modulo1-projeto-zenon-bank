@@ -1,9 +1,6 @@
 package br.com.zenom.cli;
 
-import br.com.zenom.fraud.Currency;
-import br.com.zenom.fraud.Customer;
-import br.com.zenom.fraud.Transaction;
-import br.com.zenom.fraud.TransactionType;
+import br.com.zenom.fraud.*;
 import br.com.zenom.ingestor.TransactionIngestor;
 
 import java.util.List;
@@ -16,12 +13,28 @@ public class Main {
     static void main() {
 //        testTransactionsRecords();
 
+        IO.println("====== Transactions file error test ======");
         TransactionIngestor ingestor = new TransactionIngestor();
-//        List<Transaction> transactions = ingestor.ingestorFileTransactions("data/PS_20174392719_1491204439457_log.csv");
-        List<Transaction> transactions = ingestor.ingestorFileTransactions("data/paysim_with_bad_data.csv");
-        IO.println(transactions.size());
-        transactions.stream().limit(10).forEach(IO::println);
+        List<Transaction> transactionsError = ingestor.ingestorFileTransactions("data/paysim_with_bad_data.csv");
+        IO.println(transactionsError.size());
+        transactionsError.stream().limit(10).forEach(IO::println);
+        IO.println();
 
+        IO.println("====== Fraud Analyzer =======");
+        List<Transaction> transactions = ingestor.ingestorFileTransactions("data/PS_20174392719_1491204439457_log.csv");
+        FraudAnalyzer fraudAnalyzer = new FraudAnalyzer(transactions);
+        IO.println("1. total de fraudes: " + fraudAnalyzer.countFrauds());
+
+        IO.println("2. Top 3 Fraudes de Maior Valor:");
+        fraudAnalyzer.findHighestValueFrauds(3).forEach(transaction -> IO.println(transaction.amount().value().toPlainString()));
+
+        IO.println("3. Clientes suspeitos:");
+        fraudAnalyzer.findTopSuspiciousClients(5).forEach(IO::println);
+
+        IO.println("4. Prejuízo total: " + fraudAnalyzer.totalAmountFrauds().toPlainString());
+
+        IO.println("5. Fraudes por Tipo:");
+        fraudAnalyzer.getFraudsByType().forEach((k, v) -> IO.println("- " + k.name() + ": " + v.size()));
     }
 
     private static void testTransactionsRecords() {

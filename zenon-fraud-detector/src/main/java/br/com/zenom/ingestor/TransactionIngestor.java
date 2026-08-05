@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 public class TransactionIngestor {
 
     private static final Logger log = Logger.getLogger(TransactionIngestor.class.getName());
+    private static final long LIMIT = 50_000;
 
     public List<Transaction> ingestorFileTransactions(String fileName) {
         Path path = Path.of(fileName);
@@ -23,7 +24,7 @@ public class TransactionIngestor {
         List<String> transactionLines = Files.readAllLines(path);
         return transactionLines.stream()
                 .skip(1)
-                .limit(50000)
+                .limit(LIMIT)
                 .map(TransactionIngestor::getTransaction)
                 .filter(Optional::isPresent)
                 .map(Optional::get)

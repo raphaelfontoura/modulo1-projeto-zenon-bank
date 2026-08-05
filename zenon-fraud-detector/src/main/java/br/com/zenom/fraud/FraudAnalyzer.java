@@ -1,45 +1,48 @@
 package br.com.zenom.fraud;
 
-import br.com.zenom.ingestor.TransactionIngestor;
-
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FraudAnalyzer {
 
-    static void main() {
-        TransactionIngestor ingestor = new TransactionIngestor();
-        List<Transaction> transactions = ingestor.ingestorFileTransactions("data/PS_20174392719_1491204439457_log.csv");
+    private final List<Transaction> transactions;
 
-        var frauds = transactions.stream().filter(Transaction::isFraud).toList();
-        long totalFraud = frauds.size();
-        System.out.println("1. total de fraudes: " + totalFraud);
+    public FraudAnalyzer(List<Transaction> transactions) {
+        this.transactions = transactions;
+    }
 
-        Comparator<Transaction> compAmount = Comparator.comparing(transaction -> transaction.amount().value());
+    private Stream<Transaction> getFrauds() {
+        return this.transactions.stream().filter(Transaction::isFraud);
+    }
 
-        List<Transaction> orderedFrauds = frauds.stream()
-                        .sorted(compAmount.reversed()).toList();
+    public long countFrauds() {
+        return getFrauds().filter(Transaction::isFraud).count();
+    }
 
-        System.out.println("2. Top 3 Fraudes de Maior Valor:");
-        orderedFrauds.stream().limit(3).forEach(transaction -> IO.println(transaction.amount().value().toPlainString()));
+    public List<Transaction> findHighestValueFrauds(int limit) {
+        Comparator<Transaction> comparatorAmount = Comparator.comparing(transaction -> transaction.amount().value());
 
-        List<String> greaterFrauds = orderedFrauds.stream().map(t -> t.origin().name()).distinct().limit(5).toList();
-        System.out.println("3. Clientes suspeitos:");
-        greaterFrauds.forEach(IO::println);
+        return getFrauds()
+                .sorted(comparatorAmount.reversed())
+                .limit(limit)
+                .toList();
+    }
 
-        BigDecimal totalAmounts = frauds.stream()
-                .map(transaction -> transaction.amount().value())
+    public List<String> findTopSuspiciousClients(int limit) {
+        return getFrauds().map(t -> t.origin().name()).distinct().limit(limit).toList();
+    }
+
+    public BigDecimal totalAmountFrauds() {
+        return getFrauds().map(transaction -> transaction.amount().value())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        System.out.println("4. Prejuízo total: " + totalAmounts);
+    }
 
-        Map<TransactionType, List<Transaction>> groupTypesFraud = frauds.stream().collect(Collectors.groupingBy(Transaction::type));
-
-        System.out.println("5. Fraudes por Tipo:");
-        groupTypesFraud.forEach((k, v) -> IO.println("- " + k.name() + ": " + v.size()));
-
+    public Map<TransactionType, List<Transaction>> getFraudsByType() {
+        return getFrauds().collect(Collectors.groupingBy(Transaction::type));
     }
 
 }
