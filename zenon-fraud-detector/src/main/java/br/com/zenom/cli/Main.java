@@ -47,19 +47,11 @@ public class Main {
         var client1 = "C12345";
         var client2 = "C1231006815";
 
-        var transaction = repository.findByOriginCustomerName(client1);
-        if (transaction.isEmpty()) {
-            IO.println("Transação não encontrada para o cliente " + client1);
-        } else {
-            IO.println(transaction);
-        }
+        repository.findByOriginCustomerName(client1)
+                .ifPresentOrElse(IO::println, () -> IO.println("Transação não encontrada para o cliente " + client1));
 
-        var transaction2 = repository.findByOriginCustomerName(client2);
-        if (transaction2.isEmpty()) {
-            IO.println("Transação não encontrada para o cliente " + client2);
-        } else {
-            IO.println(transaction2);
-        }
+        repository.findByOriginCustomerName(client2)
+                .ifPresentOrElse(IO::println, () -> IO.println("Transação não encontrada para o cliente " + client2));
 
         long init = System.nanoTime();
         Optional<Transaction> lastClient = repository.findByOriginCustomerName("C1868032458");
