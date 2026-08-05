@@ -3,6 +3,7 @@ package br.com.zenom.repository;
 import br.com.zenom.fraud.Transaction;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class TransactionListRepositoryImpl implements TransactionListRepository{
@@ -10,6 +11,7 @@ public class TransactionListRepositoryImpl implements TransactionListRepository{
     private final List<Transaction> transactions;
 
     public TransactionListRepositoryImpl(List<Transaction> transactions) {
+        Objects.requireNonNull(transactions);
         this.transactions = transactions;
     }
 

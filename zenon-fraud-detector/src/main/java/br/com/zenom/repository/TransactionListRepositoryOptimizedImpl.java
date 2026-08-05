@@ -11,6 +11,8 @@ public class TransactionListRepositoryOptimizedImpl implements TransactionListRe
     private final Map<String, Transaction> dbTransactions;
 
     public TransactionListRepositoryOptimizedImpl(List<Transaction> transactions) {
+        Objects.requireNonNull(transactions);
+
 //        dbTransactions = new TreeMap<>();
 //        transactions.forEach(transaction -> {
 //            dbTransactions.putIfAbsent(transaction.origin().name(), transaction);
