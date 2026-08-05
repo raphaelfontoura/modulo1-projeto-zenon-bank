@@ -26,7 +26,7 @@ public class Main {
         IO.println("1. total de fraudes: " + fraudAnalyzer.countFrauds());
 
         IO.println("2. Top 3 Fraudes de Maior Valor:");
-        fraudAnalyzer.findHighestValueFrauds(3).forEach(transaction -> IO.println(transaction.amount().value().toPlainString()));
+        fraudAnalyzer.findHighestValueFrauds(3).forEach(transaction -> IO.println(transaction.value().toPlainString()));
 
         IO.println("3. Clientes suspeitos:");
         fraudAnalyzer.findTopSuspiciousClients(5).forEach(IO::println);
@@ -34,7 +34,7 @@ public class Main {
         IO.println("4. Prejuízo total: " + fraudAnalyzer.totalAmountFrauds().toPlainString());
 
         IO.println("5. Fraudes por Tipo:");
-        fraudAnalyzer.getFraudsByType().forEach((k, v) -> IO.println("- " + k.name() + ": " + v.size()));
+        fraudAnalyzer.countFraudsByType().forEach((k, v) -> IO.println("- " + k.name() + ": " + v));
     }
 
     private static void testTransactionsRecords() {

@@ -23,9 +23,10 @@ public class FraudAnalyzer {
         return getFrauds().filter(Transaction::isFraud).count();
     }
 
-    public List<Transaction> findHighestValueFrauds(int limit) {
+    public List<Currency> findHighestValueFrauds(int limit) {
         return getFrauds()
                 .sorted(Comparator.comparing(Transaction::amount).reversed())
+                .map(Transaction::amount)
                 .limit(limit)
                 .toList();
     }
@@ -43,6 +44,10 @@ public class FraudAnalyzer {
 
     public Map<TransactionType, List<Transaction>> getFraudsByType() {
         return getFrauds().collect(Collectors.groupingBy(Transaction::type));
+    }
+
+    public Map<TransactionType, Long> countFraudsByType() {
+        return getFrauds().collect(Collectors.groupingBy(Transaction::type, Collectors.counting()));
     }
 
 }
