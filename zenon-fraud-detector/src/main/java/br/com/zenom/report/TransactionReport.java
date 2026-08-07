@@ -18,7 +18,7 @@ public class TransactionReport {
         this.filePath = Path.of(filePath);
     }
 
-    public record ReportTransaction(BigDecimal amount, boolean isFraud) {
+    private record ReportTransaction(BigDecimal amount, boolean isFraud) {
     }
 
     public record Statistics (long totalTransactions, long totalFrauds, BigDecimal totalAmount) {
@@ -53,7 +53,7 @@ public class TransactionReport {
         }
     }
 
-    public static Optional<ReportTransaction> getReportTransaction(String line) {
+    private static Optional<ReportTransaction> getReportTransaction(String line) {
         String[] values = line.split(",");
 
         try {
