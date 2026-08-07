@@ -1,9 +1,6 @@
 package br.com.zenom.ingestor;
 
-import br.com.zenom.fraud.Currency;
-import br.com.zenom.fraud.Customer;
 import br.com.zenom.fraud.Transaction;
-import br.com.zenom.fraud.TransactionType;
 
 import java.io.IOException;
 import java.nio.file.Files;
