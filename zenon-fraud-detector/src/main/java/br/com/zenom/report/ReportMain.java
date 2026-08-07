@@ -12,7 +12,8 @@ public class ReportMain {
 
         Locale locale = Locale.of("pt", "BR");
 //        Locale locale = Locale.US;
-        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(locale);
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(locale);
+        NumberFormat integerFormat = NumberFormat.getIntegerInstance(locale);
         ResourceBundle resourceBundle = ResourceBundle.getBundle("reportmessages", locale);
 
         IO.println("""
@@ -20,9 +21,9 @@ public class ReportMain {
                 %s: %s
                 %s: %s
                 """.formatted(
-                        resourceBundle.getString("total.lines"), numberFormat.format(statistics.totalTransactions()),
-                        resourceBundle.getString("total.frauds"),numberFormat.format(statistics.totalFrauds()),
-                        resourceBundle.getString("total.amount"), numberFormat.format(statistics.totalAmount())
+                        resourceBundle.getString("total.lines"), integerFormat.format(statistics.totalTransactions()),
+                        resourceBundle.getString("total.frauds"),integerFormat.format(statistics.totalFrauds()),
+                        resourceBundle.getString("total.amount"), currencyFormat.format(statistics.totalAmount())
                 )
         );
 
