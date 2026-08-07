@@ -7,11 +7,12 @@ import java.util.ResourceBundle;
 
 public class ReportMain {
 
-    static void main() {
+    static void main(String[] args) {
         TransactionReport transactionReport = new TransactionReport("data/PS_20174392719_1491204439457_log.csv");
         TransactionReport.Statistics statistics = transactionReport.generateReport();
 
-        Locale locale = Locale.of("pt", "BR");
+        String language = (args.length > 0 ? args[0]: "pt");
+        Locale locale = Locale.of(language);
 //        Locale locale = Locale.US;
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(locale);
         currencyFormat.setCurrency(Currency.getInstance("USD"));
