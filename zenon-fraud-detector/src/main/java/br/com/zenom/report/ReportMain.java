@@ -1,6 +1,7 @@
 package br.com.zenom.report;
 
 import java.text.NumberFormat;
+import java.util.Currency;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -13,6 +14,7 @@ public class ReportMain {
         Locale locale = Locale.of("pt", "BR");
 //        Locale locale = Locale.US;
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(locale);
+        currencyFormat.setCurrency(Currency.getInstance("USD"));
         NumberFormat integerFormat = NumberFormat.getIntegerInstance(locale);
         ResourceBundle resourceBundle = ResourceBundle.getBundle("reportmessages", locale);
 
@@ -21,9 +23,9 @@ public class ReportMain {
                 %s: %s
                 %s: %s
                 """.formatted(
-                        resourceBundle.getString("total.lines"), integerFormat.format(statistics.totalTransactions()),
-                        resourceBundle.getString("total.frauds"),integerFormat.format(statistics.totalFrauds()),
-                        resourceBundle.getString("total.amount"), currencyFormat.format(statistics.totalAmount())
+                        resourceBundle.getString("label.total.transactions"), integerFormat.format(statistics.totalTransactions()),
+                        resourceBundle.getString("label.total.frauds"),integerFormat.format(statistics.totalFrauds()),
+                        resourceBundle.getString("label.total.amount"), currencyFormat.format(statistics.totalAmount())
                 )
         );
 
