@@ -41,6 +41,11 @@ public class Main {
         IO.println("5. Fraudes por Tipo:");
         fraudAnalyzer.countFraudsByType().forEach((k, v) -> IO.println("- " + k.name() + ": " + v));
 
+//        memoryDatabaseTests(transactions);
+
+    }
+
+    private static void memoryDatabaseTests(List<Transaction> transactions) {
         IO.println();
         IO.println("====== Transactions memory list database =======");
         TransactionRepository repository = new TransactionListRepositoryImpl(transactions);
@@ -67,7 +72,6 @@ public class Main {
         // A pesquisa levou 20167229 nano segundos (ArrayList)
         // A pesquisa levou 835022 nano segundos (HashMap)
         // A pesquisa levou 391020 nano segundos (TreeMap)
-
     }
 
     private static void testTransactionsRecords() {

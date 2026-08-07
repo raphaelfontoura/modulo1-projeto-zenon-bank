@@ -25,7 +25,7 @@ public class TransactionIngestor {
         return transactionLines.stream()
                 .skip(1)
                 .limit(LIMIT)
-                .map(TransactionIngestor::getTransaction)
+                .map(TransactionMap::getTransaction)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
@@ -36,21 +36,4 @@ public class TransactionIngestor {
 
     }
 
-    private static Optional<Transaction> getTransaction(String line) {
-        String[] values = line.split(",");
-
-        try {
-            int step = Integer.parseInt(values[0]);
-            TransactionType type = TransactionType.valueOf(values[1]);
-            Currency amount = new Currency(values[2]);
-            Customer orig = new Customer(values[3], new Currency(values[4]), new Currency(values[5]));
-            Customer recipient = new Customer(values[6], new Currency(values[7]), new Currency(values[8]));
-            boolean isFraud = values[9].equals("1");
-            boolean isFlagged = values[10].equals("1");
-            return Optional.of(new Transaction(step, type, amount, orig, recipient, isFraud, isFlagged));
-        } catch (IllegalArgumentException ex) {
-            System.err.printf("Erro: %s | %s: %s \r\n", line, ex.getClass(), ex.getMessage());
-        }
-        return Optional.empty();
-    }
 }
