@@ -6,11 +6,11 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class TransactionMapRepositoryImpl implements TransactionRepository {
+public class TransactionMapRepository implements TransactionRepository {
 
     private final Map<String, Transaction> dbTransactions;
 
-    public TransactionMapRepositoryImpl(List<Transaction> transactions) {
+    public TransactionMapRepository(List<Transaction> transactions) {
         Objects.requireNonNull(transactions);
 
 //        dbTransactions = new TreeMap<>();
@@ -34,5 +34,10 @@ public class TransactionMapRepositoryImpl implements TransactionRepository {
     @Override
     public Optional<Transaction> findByOriginCustomerName(String name) {
         return Optional.ofNullable(dbTransactions.get(name));
+    }
+
+    @Override
+    public void save(Transaction transaction) {
+        dbTransactions.put(transaction.origin().name(), transaction);
     }
 }

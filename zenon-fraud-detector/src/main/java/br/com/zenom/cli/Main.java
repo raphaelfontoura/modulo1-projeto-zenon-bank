@@ -2,12 +2,11 @@ package br.com.zenom.cli;
 
 import br.com.zenom.fraud.*;
 import br.com.zenom.ingestor.TransactionIngestor;
-import br.com.zenom.repository.TransactionListRepositoryImpl;
+import br.com.zenom.repository.TransactionListRepository;
 import br.com.zenom.repository.TransactionRepository;
-import br.com.zenom.repository.TransactionMapRepositoryImpl;
+import br.com.zenom.repository.TransactionMapRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 public class Main {
@@ -48,7 +47,7 @@ public class Main {
     private static void memoryDatabaseTests(List<Transaction> transactions) {
         IO.println();
         IO.println("====== Transactions memory list database =======");
-        TransactionRepository repository = new TransactionListRepositoryImpl(transactions);
+        TransactionRepository repository = new TransactionListRepository(transactions);
         var client1 = "C12345";
         var client2 = "C1231006815";
 
@@ -63,7 +62,7 @@ public class Main {
         long last = System.nanoTime();
         IO.println("A pesquisa com list levou %d nano segundos".formatted((last - init)));
 
-        repository = new TransactionMapRepositoryImpl(transactions);
+        repository = new TransactionMapRepository(transactions);
 
         init = System.nanoTime();
         repository.findByOriginCustomerName("C1868032458").ifPresent(IO::println);
