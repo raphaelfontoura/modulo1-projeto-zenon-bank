@@ -2,6 +2,7 @@ package br.com.zenom.cli;
 
 import br.com.zenom.fraud.Transaction;
 import br.com.zenom.infra.DatabaseConnector;
+import br.com.zenom.ingestor.TransactionDBInitializer;
 import br.com.zenom.ingestor.TransactionIngestor;
 import br.com.zenom.repository.TransactionDBRepository;
 
