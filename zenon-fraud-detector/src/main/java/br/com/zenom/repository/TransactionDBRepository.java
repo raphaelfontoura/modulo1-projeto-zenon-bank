@@ -7,10 +7,8 @@ import br.com.zenom.fraud.TransactionType;
 import br.com.zenom.infra.DatabaseConnector;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,14 +24,12 @@ public class TransactionDBRepository implements TransactionRepository {
     public Optional<Transaction> findByOriginCustomerName(String name) {
 
         String query = """
-                select tr.step, tr.type, tr.amount,\s
-                    co.name, co.old_balance, co.new_balance,\s
-                    cr.name, cr.old_balance, cr.new_balance,
-                    tr.is_fraud, tr.is_flagged_fraud
-                from transactions tr
-                    inner join customers co on co.id = tr.origin_id
-                    inner join customers cr on cr.id = tr.recipient_id\s
-                where tr.origin_id in (select id from customers where name = ?)
+                select step, type, amount,\s
+                    origin_name, origin_old_balance, origin_new_balance,\s
+                    recipient_name, recipient_old_balance, recipient_new_balance,
+                    is_fraud, is_flagged_fraud
+                from transactions_flat
+                where origin_name = ?
                 limit 1;
                 """;
         try(var conn = connector.getDbConnection();
@@ -52,45 +48,29 @@ public class TransactionDBRepository implements TransactionRepository {
     @Override
     public void save(Transaction transaction) {
         String insertTransaction = """
-                insert into transactions (step, type, amount, origin_id, recipient_id, is_fraud, is_flagged_fraud)
-                values (?, ?, ?, ?, ?, ?, ?);
+                insert into transactions_flat (step, type, amount,
+                    origin_name, origin_old_balance, origin_new_balance,
+                    recipient_name, recipient_old_balance, recipient_new_balance,
+                    is_fraud, is_flagged_fraud)
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """;
 
-        try (var conn = connector.getDbConnection()) {
-            long originId = insertCustomer(conn, transaction.origin());
-            long recipientId = insertCustomer(conn, transaction.recipient());
-
-            try (var pstmt = conn.prepareStatement(insertTransaction)) {
-                pstmt.setInt(1, transaction.step());
-                pstmt.setString(2, transaction.type().name());
-                pstmt.setBigDecimal(3, transaction.amount().toBigDecimal());
-                pstmt.setLong(4, originId);
-                pstmt.setLong(5, recipientId);
-                pstmt.setBoolean(6, transaction.isFraud());
-                pstmt.setBoolean(7, transaction.isFlaggedFraud());
-                pstmt.executeUpdate();
-            }
+        try (var conn = connector.getDbConnection();
+             var pstmt = conn.prepareStatement(insertTransaction)) {
+            pstmt.setInt(1, transaction.step());
+            pstmt.setString(2, transaction.type().name());
+            pstmt.setBigDecimal(3, transaction.amount().toBigDecimal());
+            pstmt.setString(4, transaction.origin().name());
+            pstmt.setBigDecimal(5, transaction.origin().oldBalance().toBigDecimal());
+            pstmt.setBigDecimal(6, transaction.origin().newBalance().toBigDecimal());
+            pstmt.setString(7, transaction.recipient().name());
+            pstmt.setBigDecimal(8, transaction.recipient().oldBalance().toBigDecimal());
+            pstmt.setBigDecimal(9, transaction.recipient().newBalance().toBigDecimal());
+            pstmt.setBoolean(10, transaction.isFraud());
+            pstmt.setBoolean(11, transaction.isFlaggedFraud());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private long insertCustomer(Connection conn, Customer customer) throws SQLException {
-        String insertCustomer = """
-                insert into customers (name, old_balance, new_balance)
-                values (?, ?, ?);
-                """;
-        try (var pstmt = conn.prepareStatement(insertCustomer, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, customer.name());
-            pstmt.setBigDecimal(2, customer.oldBalance().toBigDecimal());
-            pstmt.setBigDecimal(3, customer.newBalance().toBigDecimal());
-            pstmt.executeUpdate();
-            try (var rs = pstmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getLong(1);
-                }
-                throw new SQLException("no generated key returned for customer " + customer.name());
-            }
         }
     }
 

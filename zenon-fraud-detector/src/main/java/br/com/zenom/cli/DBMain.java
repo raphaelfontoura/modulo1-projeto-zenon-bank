@@ -14,9 +14,9 @@ public class DBMain {
     static void main() {
         TransactionIngestor ingestor = new TransactionIngestor();
         DatabaseConnector dbConnector = new DatabaseConnector();
-//        List<Transaction> transactions = ingestor.ingestorFileTransactions("data/PS_20174392719_1491204439457_log.csv");
+        List<Transaction> transactions = ingestor.ingestorFileTransactions("data/PS_20174392719_1491204439457_log.csv");
         TransactionDBRepository repository = new TransactionDBRepository(dbConnector);
-//        TransactionDBInitializer.init(repository, transactions);
+        TransactionDBInitializer.init(repository, transactions);
 
         repository.findByOriginCustomerName("C1231006815").ifPresent(System.out::println);
         repository.findByOriginCustomerName("C1674899618").ifPresentOrElse(IO::println, () -> IO.println(ERROR_MESSAGE));
