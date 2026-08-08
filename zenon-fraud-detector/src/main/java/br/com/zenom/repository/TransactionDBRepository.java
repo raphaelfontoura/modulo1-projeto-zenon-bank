@@ -33,7 +33,8 @@ public class TransactionDBRepository implements TransactionRepository {
                 from transactions tr
                     inner join customers co on co.id = tr.origin_id
                     inner join customers cr on cr.id = tr.recipient_id\s
-                where tr.origin_id = (select id from customers where name = ?);
+                where tr.origin_id in (select id from customers where name = ?)
+                limit 1;
                 """;
         try(var conn = connector.getDbConnection();
         var pstmt = conn.prepareStatement(query);) {
