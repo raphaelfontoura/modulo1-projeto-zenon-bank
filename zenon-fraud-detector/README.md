@@ -23,11 +23,30 @@ This is part of the **Zenon Bank** project — a university assignment exploring
 ./gradlew run
 ```
 
+## Dataset Setup
+
+The project expects the PaySim CSV file at:
+
+```text
+data/PS_20174392719_1491204439457_log.csv
+```
+
+This file was obtained from the Kaggle PaySim dataset page and is used by the ingestion/learning flow:
+
+- Kaggle source: https://www.kaggle.com/datasets/ealaxi/paysim1?resource=download
+- Expected local path: `data/PS_20174392719_1491204439457_log.csv`
+- Entry point that uses it: `src/main/java/br/com/zenom/cli/IngestionMain.java`
+
+If you download the dataset yourself, place the CSV in the `data/` directory with that filename before running the ingestion example.
+
 To run a specific entry point directly:
 
 ```bash
 # Fraud analyzer CLI demo
 java -cp build/classes/java/main br.com.zenom.cli.Main
+
+# Dataset ingestion / repository loading example
+java -cp build/classes/java/main br.com.zenom.cli.IngestionMain
 
 # i18n report generator
 java -cp build/classes/java/main br.com.zenom.report.ReportMain
