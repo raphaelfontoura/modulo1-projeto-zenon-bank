@@ -40,13 +40,15 @@ public class EfficientTransactionIngestor {
     public void readBatch(String fileName, Consumer<List<Transaction>> consumer) {
         Path path = Path.of(fileName);
         List<Transaction> transactions = new CopyOnWriteArrayList<>();
-        // ExecutorService executor = Executors.newFixedThreadPool(6);
-        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+
+        // ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()
+        try (ExecutorService executor = Executors.newFixedThreadPool(10);
                 Stream<String> lines = Files.lines(path)) {
 
             Iterator<String> iterator = lines
                     .skip(1)
 //                    .limit(LIMIT)
+                    .parallel()
                     .iterator();
             while (iterator.hasNext()) {
                 String line = iterator.next();

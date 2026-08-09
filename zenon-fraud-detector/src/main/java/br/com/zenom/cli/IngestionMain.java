@@ -17,7 +17,7 @@ public class IngestionMain {
 
         long firstTime = System.currentTimeMillis();
 //        ingestor.readAsStream(fileName, repository::save); // Elapsed time: 170610 ms
-        ingestor.readBatch(fileName, repository::saveAll); //Elapsed time: 46635
+        ingestor.readBatch(fileName, repository::saveAll); //Elapsed time: 46635 | full file: Elapsed time: 224883 ms
         long lastTime = System.currentTimeMillis();
         long elapsedTime = lastTime - firstTime;
 

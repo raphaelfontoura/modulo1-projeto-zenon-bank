@@ -18,7 +18,7 @@ public class TransactionDBRepository implements TransactionRepository {
 
     private static final Logger log = Logger.getLogger(TransactionDBRepository.class.getName());
     public static final int JDBC_BATCH_SIZE = 2500;
-    private final Semaphore dbConnections = new Semaphore(30);
+//    private final Semaphore dbConnections = new Semaphore(20); // control virtual threads connections
 
     @Override
     public Optional<Transaction> findByOriginCustomerName(String name) {
@@ -84,7 +84,6 @@ public class TransactionDBRepository implements TransactionRepository {
                 """;
 
         try (var conn = DatabaseConnector.getDbConnection()) {
-            dbConnections.acquire();
             conn.setAutoCommit(false);
             int count = 0;
             try (var pstmt = conn.prepareStatement(insertTransaction)) {
@@ -112,23 +111,22 @@ public class TransactionDBRepository implements TransactionRepository {
 
                 int[] results = pstmt.executeBatch();
                 conn.commit();
-                log.info(() -> "Inserted rows: " + results.length);
+//                log.info(() -> "Inserted rows: " + results.length);
                 conn.setAutoCommit(true);
 
             } catch (SQLException e) {
                 try {
                     conn.rollback();
                 } catch (SQLException ex) {
+                    log.severe(() -> "Erro ao executar rollback: " + ex.getMessage());
                     throw new RuntimeException("Erro ao executar rollback", ex);
                 }
+                log.severe(() -> "Erro ao inserir dados: " + e.getMessage());
                 throw new RuntimeException("Insert database error", e);
             }
         } catch (SQLException e) {
+            log.severe(() -> "Erro ao conectar ao banco de dados: " + e.getMessage());
             throw new RuntimeException("Database connection error", e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            dbConnections.release();
         }
 
     }
