@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 public class TransactionDBRepository implements TransactionRepository {
 
     private static final Logger log = Logger.getLogger(TransactionDBRepository.class.getName());
+    public static final int JDBC_BATCH_SIZE = 2500;
 
     @Override
     public Optional<Transaction> findByOriginCustomerName(String name) {
@@ -71,7 +72,7 @@ public class TransactionDBRepository implements TransactionRepository {
         }
     }
 
-    public void save(List<Transaction> transactions) {
+    public void saveAll(List<Transaction> transactions) {
         String insertTransaction = """
                 insert into transactions_flat (step, type, amount,
                     origin_name, origin_old_balance, origin_new_balance,
@@ -80,29 +81,49 @@ public class TransactionDBRepository implements TransactionRepository {
                 values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """;
 
-        try (var conn = DatabaseConnector.getDbConnection();
-             var pstmt = conn.prepareStatement(insertTransaction)) {
-            for (var transaction : transactions) {
-                pstmt.setInt(1, transaction.step());
-                pstmt.setString(2, transaction.type().name());
-                pstmt.setBigDecimal(3, transaction.amount().toBigDecimal());
-                pstmt.setString(4, transaction.origin().name());
-                pstmt.setBigDecimal(5, transaction.origin().oldBalance().toBigDecimal());
-                pstmt.setBigDecimal(6, transaction.origin().newBalance().toBigDecimal());
-                pstmt.setString(7, transaction.recipient().name());
-                pstmt.setBigDecimal(8, transaction.recipient().oldBalance().toBigDecimal());
-                pstmt.setBigDecimal(9, transaction.recipient().newBalance().toBigDecimal());
-                pstmt.setBoolean(10, transaction.isFraud());
-                pstmt.setBoolean(11, transaction.isFlaggedFraud());
-                pstmt.addBatch();
+        try (var conn = DatabaseConnector.getDbConnection()) {
+            conn.setAutoCommit(false);
+            int count = 0;
+            try (var pstmt = conn.prepareStatement(insertTransaction)) {
+                for (var transaction : transactions) {
+                    pstmt.setInt(1, transaction.step());
+                    pstmt.setString(2, transaction.type().name());
+                    pstmt.setBigDecimal(3, transaction.amount().toBigDecimal());
+                    pstmt.setString(4, transaction.origin().name());
+                    pstmt.setBigDecimal(5, transaction.origin().oldBalance().toBigDecimal());
+                    pstmt.setBigDecimal(6, transaction.origin().newBalance().toBigDecimal());
+                    pstmt.setString(7, transaction.recipient().name());
+                    pstmt.setBigDecimal(8, transaction.recipient().oldBalance().toBigDecimal());
+                    pstmt.setBigDecimal(9, transaction.recipient().newBalance().toBigDecimal());
+                    pstmt.setBoolean(10, transaction.isFraud());
+                    pstmt.setBoolean(11, transaction.isFlaggedFraud());
+                    pstmt.addBatch();
+                    count++;
+
+                    if (count % JDBC_BATCH_SIZE == 0) {
+                        int[] rows = pstmt.executeBatch();
+                        conn.commit();
+                        log.info(() -> "Saved rows " + rows.length);
+                    }
+                }
+
+                int[] results = pstmt.executeBatch();
+                conn.commit();
+                log.info(() -> "Inserted rows: " + results.length);
+                conn.setAutoCommit(true);
+
+            } catch (SQLException e) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    throw new RuntimeException("Erro ao executar rollback", ex);
+                }
+                throw new RuntimeException("Insert database error", e);
             }
-
-            int[] results = pstmt.executeBatch();
-            log.info(() -> "Inserted rows: " + results.length);
-
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Database connection error", e);
         }
+
     }
 
     private Transaction from(ResultSet rs) throws SQLException {
