@@ -11,14 +11,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public class TransactionDBRepository implements TransactionRepository {
 
-    DatabaseConnector connector;
-
-    public TransactionDBRepository(DatabaseConnector connector) {
-        this.connector = connector;
-    }
+    private static final Logger log = Logger.getLogger(TransactionDBRepository.class.getName());
 
     @Override
     public Optional<Transaction> findByOriginCustomerName(String name) {
@@ -32,7 +29,7 @@ public class TransactionDBRepository implements TransactionRepository {
                 where origin_name = ?
                 limit 1;
                 """;
-        try(var conn = connector.getDbConnection();
+        try(var conn = DatabaseConnector.getDbConnection();
         var pstmt = conn.prepareStatement(query);) {
             pstmt.setString(1, name);
             var rs = pstmt.executeQuery();
@@ -55,7 +52,7 @@ public class TransactionDBRepository implements TransactionRepository {
                 values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """;
 
-        try (var conn = connector.getDbConnection();
+        try (var conn = DatabaseConnector.getDbConnection();
              var pstmt = conn.prepareStatement(insertTransaction)) {
             pstmt.setInt(1, transaction.step());
             pstmt.setString(2, transaction.type().name());
@@ -69,6 +66,40 @@ public class TransactionDBRepository implements TransactionRepository {
             pstmt.setBoolean(10, transaction.isFraud());
             pstmt.setBoolean(11, transaction.isFlaggedFraud());
             pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void save(List<Transaction> transactions) {
+        String insertTransaction = """
+                insert into transactions_flat (step, type, amount,
+                    origin_name, origin_old_balance, origin_new_balance,
+                    recipient_name, recipient_old_balance, recipient_new_balance,
+                    is_fraud, is_flagged_fraud)
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """;
+
+        try (var conn = DatabaseConnector.getDbConnection();
+             var pstmt = conn.prepareStatement(insertTransaction)) {
+            for (var transaction : transactions) {
+                pstmt.setInt(1, transaction.step());
+                pstmt.setString(2, transaction.type().name());
+                pstmt.setBigDecimal(3, transaction.amount().toBigDecimal());
+                pstmt.setString(4, transaction.origin().name());
+                pstmt.setBigDecimal(5, transaction.origin().oldBalance().toBigDecimal());
+                pstmt.setBigDecimal(6, transaction.origin().newBalance().toBigDecimal());
+                pstmt.setString(7, transaction.recipient().name());
+                pstmt.setBigDecimal(8, transaction.recipient().oldBalance().toBigDecimal());
+                pstmt.setBigDecimal(9, transaction.recipient().newBalance().toBigDecimal());
+                pstmt.setBoolean(10, transaction.isFraud());
+                pstmt.setBoolean(11, transaction.isFlaggedFraud());
+                pstmt.addBatch();
+            }
+
+            int[] results = pstmt.executeBatch();
+            log.info(() -> "Inserted rows: " + results.length);
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
