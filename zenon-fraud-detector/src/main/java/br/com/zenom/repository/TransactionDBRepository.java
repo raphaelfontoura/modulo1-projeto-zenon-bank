@@ -11,12 +11,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 
 public class TransactionDBRepository implements TransactionRepository {
 
     private static final Logger log = Logger.getLogger(TransactionDBRepository.class.getName());
     public static final int JDBC_BATCH_SIZE = 2500;
+    private final Semaphore dbConnections = new Semaphore(30);
 
     @Override
     public Optional<Transaction> findByOriginCustomerName(String name) {
@@ -82,6 +84,7 @@ public class TransactionDBRepository implements TransactionRepository {
                 """;
 
         try (var conn = DatabaseConnector.getDbConnection()) {
+            dbConnections.acquire();
             conn.setAutoCommit(false);
             int count = 0;
             try (var pstmt = conn.prepareStatement(insertTransaction)) {
@@ -122,6 +125,10 @@ public class TransactionDBRepository implements TransactionRepository {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Database connection error", e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            dbConnections.release();
         }
 
     }
